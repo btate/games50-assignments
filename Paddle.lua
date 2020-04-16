@@ -26,15 +26,21 @@ Paddle = Class{}
     have their own x, y, width, and height values, thus serving as containers
     for data. In this sense, they're very similar to structs in C.
 ]]
-function Paddle:init(x, y, width, height)
+function Paddle:init(x, y, width, height, aiEnabled)
     self.x = x
     self.y = y
     self.width = width
     self.height = height
     self.dy = 0
+    self.aiEnabled = aiEnabled
 end
 
 function Paddle:update(dt)
+
+    if self.aiEnabled then
+        self:executeAI()
+    end
+
     -- math.max here ensures that we're the greater of 0 or the player's
     -- current calculated Y position when pressing up so that we don't
     -- go into the negatives; the movement calculation is simply our
@@ -59,4 +65,17 @@ end
 ]]
 function Paddle:render()
     love.graphics.rectangle('fill', self.x, self.y, self.width, self.height)
+end
+
+function Paddle:executeAI()
+    topRange = self.y - 1
+    bottomRange = self.y + 1
+
+    if ball.y < topRange then
+        self.dy = -PADDLE_SPEED
+    elseif ball.y > bottomRange then
+        self.dy = PADDLE_SPEED
+    else
+        self.dy = 0
+    end
 end
