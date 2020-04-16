@@ -21,6 +21,8 @@ Paddle = Class{}
     Our Paddle should take an X and a Y, for positioning, as well as a width
     and height for its dimensions.
 
+    The last property is a flag to enable AI movement
+
     Note that `self` is a reference to *this* object, whichever object is
     instantiated at the time this function is called. Different objects can
     have their own x, y, width, and height values, thus serving as containers
@@ -67,6 +69,10 @@ function Paddle:render()
     love.graphics.rectangle('fill', self.x, self.y, self.width, self.height)
 end
 
+--[[
+    Very simple AI implementation.
+    Just moves the paddle up and down toward the ball at all times with a small buffer to minimize jitteriness
+]]
 function Paddle:executeAI()
     topRange = self.y - 1
     bottomRange = self.y + 1
