@@ -39,7 +39,7 @@ end
 
 function Paddle:update(dt)
 
-    if self.aiEnabled then
+    if self.aiEnabled and gameState == 'play' then
         self:executeAI()
     end
 
@@ -70,16 +70,30 @@ function Paddle:render()
 end
 
 --[[
-    Very simple AI implementation.
-    Just moves the paddle up and down toward the ball at all times with a small buffer to minimize jitteriness
+    Uses the calculated projected ball destination to find a target y position and move toward it
 ]]
 function Paddle:executeAI()
-    topRange = self.y - 1
-    bottomRange = self.y + 1
 
-    if ball.y < topRange then
+    -- Try to get get the middle of the paddle to the ball
+    paddleMidPoint = self.y + (self.height / 2)
+
+    -- Add some buffer for movement to curb jitteriness
+    topBound = paddleMidPoint - 2
+    bottomBound = paddleMidPoint + 2
+
+    verticalCenter = VIRTUAL_HEIGHT / 2
+
+    if (ball.dx > 0 and self.x < ball.x) or (ball.dx < 0 and self.x > ball.x) then
+        -- If the ball is moving away from this paddle, center the paddle
+        targetYPosition = verticalCenter;
+    else 
+        -- Otherwise move to the ball destination
+        targetYPosition = projectedBallGoalDestination == nil and verticalCenter or projectedBallGoalDestination
+    end
+
+    if targetYPosition < topBound then
         self.dy = -PADDLE_SPEED
-    elseif ball.y > bottomRange then
+    elseif targetYPosition > bottomBound then
         self.dy = PADDLE_SPEED
     else
         self.dy = 0

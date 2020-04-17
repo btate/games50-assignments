@@ -31,6 +31,9 @@ push = require 'push'
 -- https://github.com/vrld/hump/blob/master/class.lua
 Class = require 'class'
 
+-- Utils for AI calculations
+require 'trig_utils'
+
 -- our Paddle class, which stores position and dimensions for each Paddle
 -- and the logic for rendering them
 require 'Paddle'
@@ -49,6 +52,13 @@ VIRTUAL_HEIGHT = 243
 
 -- paddle movement speed
 PADDLE_SPEED = 200
+
+--[[
+    Keeping track of the calculated ball trajectory to save on AI calculations
+    This should be kept in a separate state manager, but rather than make up my own strategy for that
+    I'm assuming there will be some strategies covered in a future lesson
+]]
+projectedBallGoalDestination = nil
 
 --[[
     Called just once at the beginning of the game; used to set up
@@ -136,6 +146,7 @@ end
     across system hardware.
 ]]
 function love.update(dt)
+
     if gameState == 'serve' then
         -- before switching to play, initialize ball's velocity based
         -- on player who last scored
@@ -145,6 +156,8 @@ function love.update(dt)
         else
             ball.dx = -math.random(140, 200)
         end
+
+        calculateProjectedBallGoalDestination()
     elseif gameState == 'play' then
         -- detect ball collision with paddles, reversing dx if true and
         -- slightly increasing it, then altering the dy based on the position
@@ -160,6 +173,8 @@ function love.update(dt)
                 ball.dy = math.random(10, 150)
             end
 
+            calculateProjectedBallGoalDestination()
+
             sounds['paddle_hit']:play()
         end
         if ball:collides(player2) then
@@ -173,6 +188,8 @@ function love.update(dt)
                 ball.dy = math.random(10, 150)
             end
 
+            calculateProjectedBallGoalDestination()
+
             sounds['paddle_hit']:play()
         end
 
@@ -181,6 +198,9 @@ function love.update(dt)
         if ball.y <= 0 then
             ball.y = 0
             ball.dy = -ball.dy
+
+            calculateProjectedBallGoalDestination()
+
             sounds['wall_hit']:play()
         end
 
@@ -188,6 +208,9 @@ function love.update(dt)
         if ball.y >= VIRTUAL_HEIGHT - 4 then
             ball.y = VIRTUAL_HEIGHT - 4
             ball.dy = -ball.dy
+
+            calculateProjectedBallGoalDestination()
+
             sounds['wall_hit']:play()
         end
 
@@ -207,6 +230,8 @@ function love.update(dt)
                 gameState = 'serve'
                 -- places the ball in the middle of the screen, no velocity
                 ball:reset()
+
+                projectedBallGoalDestination = nil
             end
         end
 
@@ -221,6 +246,8 @@ function love.update(dt)
             else
                 gameState = 'serve'
                 ball:reset()
+
+                projectedBallGoalDestination = nil
             end
         end
     end
@@ -284,6 +311,7 @@ function love.keypressed(key)
             gameState = 'serve'
 
             ball:reset()
+            projectedBallGoalDestination = nil
 
             -- reset scores to 0
             player1Score = 0
@@ -367,4 +395,22 @@ function displayFPS()
     love.graphics.setColor(0, 255, 0, 255)
     love.graphics.print('FPS: ' .. tostring(love.timer.getFPS()), 10, 10)
     love.graphics.setColor(255, 255, 255, 255)
+end
+
+--[[
+    Treats dx and dy like two sides of a right triangle.
+    Uses trigonometry to find the ball's angle.
+    Uses trigonometry to calculate the ball's destination using the ball's angle
+    and a horizontal side of the triangle that stretches from the ball to the goal.
+]]
+function calculateProjectedBallGoalDestination()
+    angle = calculateAngle(ball.dx, ball.dy)
+    horizontalSideLength = ball.dx < 0 and ball.x or VIRTUAL_WIDTH - ball.x
+    verticalSideLength = calculateVerticalSideLength(angle, horizontalSideLength)
+
+    if ball.dy < 0 then
+        verticalSideLength = -verticalSideLength
+    end
+
+    projectedBallGoalDestination = ball.y + verticalSideLength
 end
