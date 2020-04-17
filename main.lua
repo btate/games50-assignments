@@ -95,8 +95,7 @@ function love.load()
     push:setupScreen(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, {
         fullscreen = false,
         resizable = true,
-        vsync = true,
-        canvas = false
+        vsync = true
     })
 
     -- initialize our player paddles; make them global so that they can be
@@ -214,7 +213,7 @@ function love.update(dt)
             sounds['wall_hit']:play()
         end
 
-        -- if we reach the left or right edge of the screen, go back to serve
+        -- if we reach the left edge of the screen, go back to serve
         -- and update the score and serving player
         if ball.x < 0 then
             servingPlayer = 1
@@ -235,16 +234,21 @@ function love.update(dt)
             end
         end
 
+        -- if we reach the right edge of the screen, go back to serve
+        -- and update the score and serving player
         if ball.x > VIRTUAL_WIDTH then
             servingPlayer = 2
             player1Score = player1Score + 1
             sounds['score']:play()
 
+            -- if we've reached a score of 10, the game is over; set the
+            -- state to done so we can show the victory message
             if player1Score == 10 then
                 winningPlayer = 1
                 gameState = 'done'
             else
                 gameState = 'serve'
+                -- places the ball in the middle of the screen, no velocity
                 ball:reset()
 
                 projectedBallGoalDestination = nil
@@ -333,7 +337,7 @@ end
 ]]
 function love.draw()
     -- begin drawing with push, in our virtual resolution
-    push:start()
+    push:apply('start')
 
     love.graphics.clear(40, 45, 52, 255)
     
@@ -371,7 +375,7 @@ function love.draw()
     displayFPS()
 
     -- end our drawing to push
-    push:finish()
+    push:apply('end')
 end
 
 --[[
@@ -394,7 +398,6 @@ function displayFPS()
     love.graphics.setFont(smallFont)
     love.graphics.setColor(0, 255, 0, 255)
     love.graphics.print('FPS: ' .. tostring(love.timer.getFPS()), 10, 10)
-    love.graphics.setColor(255, 255, 255, 255)
 end
 
 --[[
