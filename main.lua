@@ -408,7 +408,14 @@ end
 ]]
 function calculateProjectedBallGoalDestination()
     angle = calculateAngle(ball.dx, ball.dy)
-    horizontalSideLength = ball.dx < 0 and ball.x or VIRTUAL_WIDTH - ball.x
+    
+    -- Calculate horizontal distance from the ball to the paddle
+    if ball.dx < 0 then
+        horizontalSideLength = ball.x - (player1.x + player1.width)
+    else
+        horizontalSideLength = player2.x - ball.x
+    end
+
     verticalSideLength = calculateVerticalSideLength(angle, horizontalSideLength)
 
     if ball.dy < 0 then
