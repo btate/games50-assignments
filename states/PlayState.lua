@@ -28,6 +28,22 @@ function PlayState:init()
 end
 
 function PlayState:update(dt)
+
+    -- pause/unpause if p was pressed
+    if love.keyboard.wasPressed('p') then
+        gStateMachine:change('pause', {
+            bird = self.bird,
+            pipePairs = self.pipePairs,
+            timer = self.timer,
+            score = self.score
+        })
+    end
+
+    -- Don't scroll or spawn pipes if not scrolling
+    if not scrolling then
+        return
+    end
+
     -- update timer for pipe spawning
     self.timer = self.timer + dt
 
@@ -115,7 +131,16 @@ end
 --[[
     Called when this state is transitioned to from another state.
 ]]
-function PlayState:enter()
+function PlayState:enter(enterParams)
+
+    -- Reset play state
+    if enterParams then
+        self.bird = enterParams.bird and enterParams.bird or self.bird
+        self.pipePairs = enterParams.pipePairs and enterParams.pipePairs or self.pipePairs
+        self.timer = enterParams.timer and enterParams.timer or self.timer
+        self.score = enterParams.score and enterParams.score or self.score
+    end
+
     -- if we're coming from death, restart scrolling
     scrolling = true
 end
