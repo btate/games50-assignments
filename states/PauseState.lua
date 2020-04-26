@@ -40,12 +40,19 @@ function PauseState:enter(playState)
 
     -- pause music
     love.audio.pause(sounds['music'])
+
+    -- play pause sound
+    sounds['pause']:play()
 end
 
 --[[
     Called when this state changes to another state.
 ]]
 function PauseState:exit()
+
+    -- play pause sound
+    sounds['pause']:play()
+
     -- resume music
     love.audio.resume(sounds['music'])
 end
