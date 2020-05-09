@@ -40,6 +40,11 @@ function LevelMaker.createMap(level)
     local numCols = math.random(7, 13)
     numCols = numCols % 2 == 0 and (numCols + 1) or numCols
 
+    -- Randomly decide if we need a locked brick
+    local needsLockedBrick = RandomBoolean()
+    local lockedBrickRow = math.random(1, numRows)
+    local lockedBrickCol = math.random(1, numCols)
+
     -- highest possible spawned brick color in this level; ensure we
     -- don't go above 3
     local highestTier = math.min(3, math.floor(level / 5))
@@ -77,6 +82,15 @@ function LevelMaker.createMap(level)
                 -- turn skipping off for the next iteration
                 skipFlag = not skipFlag
 
+                -- adjust locked brick if it is skipped
+                if needsLockedBrick and y == lockedBrickRow and x == lockedBrickCol then
+                    if x == numCols then
+                        lockedBrickRow = lockedBrickRow + 1
+                    else
+                        lockedBrickCol = lockedBrickCol + 1
+                    end
+                end
+
                 -- Lua doesn't have a continue statement, so this is the workaround
                 goto continue
             else
@@ -94,6 +108,11 @@ function LevelMaker.createMap(level)
                 -- y-coordinate
                 y * 16                  -- just use y * 16, since we need top padding anyway
             )
+
+            -- handle a locked brick
+            if needsLockedBrick and y == lockedBrickRow and x == lockedBrickCol then
+                b.locked = true
+            end
 
             -- if we're alternating, figure out which color/tier we're on
             if alternatePattern and alternateFlag then

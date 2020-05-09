@@ -55,7 +55,11 @@ end
     we have to return a subset of GenerateQuads.
 ]]
 function GenerateQuadsBricks(atlas)
-    return table.slice(GenerateQuads(atlas, 32, 16), 1, 21)
+    local quads = GenerateQuads(atlas, 32, 16)
+    local bricks = table.slice(quads, 1, 21)
+    table.insert(bricks, table.slice(quads, 24, 24)[1])
+    
+    return bricks
 end
 
 --[[
@@ -124,4 +128,21 @@ function GenerateQuadsBalls(atlas)
     end
 
     return quads
+end
+
+--[[
+    This function is specifically made to piece out the powerups from the
+    sprite sheet. Since the sprite sheet has non-uniform sprites within,
+    we have to return a subset of GenerateQuads.
+]]
+function GenerateQuadsPowerUps(atlas)
+    return table.slice(GenerateQuads(atlas, 16, 16), 145, 155)
+end
+
+
+--[[
+    Random boolean convenience method
+]]
+function RandomBoolean()
+    return math.random() <= 0.5
 end

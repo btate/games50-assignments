@@ -20,3 +20,10 @@ VIRTUAL_HEIGHT = 243
 
 -- paddle movement speed
 PADDLE_SPEED = 200
+
+-- required points for paddle growth
+PADDLE_GROWTH_TIER = 5000
+
+-- power up skins
+POWER_UP_SKIN_KEY = 10
+POWER_UP_SKIN_MULTI_BALL = 9
